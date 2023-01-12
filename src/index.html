@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Combat à mort</title>
+    <style>
+        /* Styles pour les combattants */
+        .fighter {
+            display: flex;
+            align-items: center;
+            margin: 10px;
+        }
+
+        /* Styles pour l'icône */
+        .fighter-icone {
+            font-size: 30px;
+            margin-right: 10px;
+        }
+
+        /* Styles pour la barre de vie */
+        .fighter-life {
+            width: 100px;
+            height: 20px;
+            background-color: gray;
+        }
+
+        /* Styles pour la vie restante */
+        .fighter-life-remaining {
+            height: 100%;
+            background-color: green;
+            transition: width 0.5s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Combat à mort</h1>
+    <div id="fighters"></div>
+    <button id="start-button">Lancer le combat</button>
+    <div id="result"></div>
+    <div id="scores"></div>
+    <div id="victories"></div>
+
+    <script>
+        const MAX_LIFE = 100;
+        class Fighter {
+            constructor(icone, name, strength, dexterity) {
+                this.icone = icone;
+                this.name = name;
+                this.strength = strength;
+                this.dexterity = dexterity;
+                this.life = MAX_LIFE;
+            }
+            fight(adversaire) {
+                const attPoints = this.getRandomInt(this.strength);
+                const damage = Math.max(attPoints - adversaire.dexterity, 0);
+                adversaire.life = adversaire.life > 0 ? adversaire.life - damage : 0;
+            }
+            getRandomInt(max) {
+                return 1 + Math.floor(Math.random() * max);
+            }
+            get fightername() {
+                return `${this.icone} ${this.name}`
+            }
+            get fighterlife() {
+                return this.life
+            }
+        }
+
+        // Create fighters
+        const fighters = [
+            new Fighter("🧔", "Heracles", 20, 6),
+            new Fighter("🦁", "Nemean Lion", 11, 13),
+            new Fighter("🐍", "Medusa", 12, 18),
+            new Fighter("🐂", "Minotaure", 25, 8),
+        ];
+
+        // create the table for the rounds
+        const roundsTable = document.createElement("table");
+        roundsTable.setAttribute("id", "rounds-table");
+        const roundsTableHead = document.createElement("thead");
+        const roundsTableHeadRow = document.createElement("tr");
+        roundsTableHeadRow.innerHTML = `<th>Round</th><th>Attacker</th><th>Defender</th><th>Damage</th><th>Defender Life</th>`;
+        roundsTableHead.appendChild(roundsTableHeadRow);
+        roundsTable.appendChild(roundsTableHead);
+        const roundsTableBody = document.createElement("tbody");
+        roundsTable.appendChild(roundsTableBody);
+
+        // create the table for the scores
+        const scoresTable = document.createElement("table");
+        scoresTable.setAttribute("id", "scores-table");
+        const scoresTableHead = document.createElement("thead");
+        const scoresTableHeadRow = document.createElement("tr");
+        scoresTableHeadRow.innerHTML = `<th>Fighter</th><th>Victories</th><th>Win Rate</th>`;
+        scoresTableHead.appendChild(scoresTableHeadRow);
+        scoresTable.appendChild(scoresTableHead);
+        const scoresTableBody = document.createElement("tbody");
+        scoresTable.appendChild(scoresTableBody);
+
+        // add the tables to the HTML
+        document.getElementById("result").appendChild(roundsTable);
+        document.getElementById("result").appendChild(scoresTable);
+
+        // event listener for the start button
+        startButton.addEventListener('click', () => {
+            // start the fight
+            let round = 1;
+            let scores = []
+            let victories = {}
+            for (let i = 0; i < fighters.length; i++) {
+                for (let j = i + 1; j < fighters.length; j++) {
+                    let hasFight = false;
+                    let attacker = fighters[i];
+                    let defender = fighters[j];
+                    while (attacker.life > 0 && defender.life > 0) {
+                        const defenderLife = defender.life;
+                        attacker.fight(defender);
+                        if (defenderLife - defender.life > 0) {
+                            hasFight = true;
+                            console.log(`Round ${round}:`);
+                            console.log(`${attacker.fightername} attaque ${defender.fightername} et lui inflige ${defenderLife - defender.life} points de dommages.`);
+                            console.log(`Points de vie restants : ${defender.fightername} ${defender.fighterlife}`);
+                            scores.push({
+                                round: round,
+                                attacker: attacker.fightername,
+                                defender: defender.fightername,
+                                damage: defenderLife - defender.life,
+                                defenderLife: defender.fighterlife
+                            });
+                            // update the fighters life in the HTML
+                            document.getElementById(`${attacker.name}-life-remaining`).style.width = `${(attacker.life / MAX_LIFE) * 100}%`;
+                            document.getElementById(`${defender.name}-life-remaining`).style.width = `${(defender.life / MAX_LIFE) * 100}%`;
+                        }
+                    }
+                }
+            }
+        })
