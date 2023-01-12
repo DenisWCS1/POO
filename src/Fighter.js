@@ -10,14 +10,12 @@ class Fighter {
   }
   fight(defender) {
     const attPoints = this.getRandomInt(this.strength);
-    const impact = attPoints - defender.dexterity;
-    defender.life = Math.max(defender.life - impact, 0);
+    const impact = Math.max(attPoints - defender.dexterity, 0);
+    defender.life = defender.life > 0 ? defender.life - impact : 0;
+    return defender.life;
   }
   getRandomInt(max) {
     return 1 + Math.floor(Math.random() * max);
-  }
-  Resultat() {
-    return this.life > 0;
   }
 }
 
