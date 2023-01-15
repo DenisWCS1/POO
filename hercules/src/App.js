@@ -7,9 +7,7 @@ import './App.css';
 function App() {
   return (
     <div>
-      {Fighters.map((value, i) => (
-        <Fight key={i} {...value} />
-      ))}
+      <Fight />
     </div>
   );
 }

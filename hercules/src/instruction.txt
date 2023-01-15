@@ -1,0 +1,76 @@
+import React, { useState } from 'react';
+import Fighters from './Fighters';
+
+const Battle = () => {
+    const [fighter1, setFighter1] = useState(Fighters[0]);
+    const [fighter2, setFighter2] = useState(Fighters[1]);
+    const [rounds, setRounds] = useState([]);
+    const [round, setRound] = useState(1);
+    const [isFight, setIsFight] = useState(false);
+
+    // Récupération de la sélection des combattants
+    const handleSelectFighter1 = (e) => {
+        setFighter1(Fighters[e.target.value]);
+    }
+
+    const handleSelectFighter2 = (e) => {
+        setFighter2(Fighters[e.target.value]);
+    }
+
+    // Combat
+    const handleFight = () => {
+        setIsFight(true);
+
+        // Vérifie que les combattants sont encore en vie
+        if (fighter1.life <= 0 || fighter2.life <= 0) {
+            console.log("Un des combattants est mort, le combat est terminé");
+            return;
+        }
+
+        // Limite le nombre de tours de combat
+        if (round > 10) {
+            console.log("Le nombre maximum de tours de combat a été atteint");
+            return;
+        }
+        //truc
+
+        // Impact aléatoire
+        const getRandomInt = (force) => {
+            return 1 + Math.floor(Math.random() * force);
+        }
+
+        // Combat avec fighter1
+        const attPoints1 = getRandomInt(fighter1.strength);
+        const impact1 = Math.max(attPoints1 - fighter1.parade, 0);
+        const fighter1NewLife = fighter1.life - impact1;
+
+        // Combat avec fighter2
+        const attPoints2 = getRandomInt(fighter2.strength);
+        const impact2 = Math.max(attPoints2 - fighter2.parade, 0);
+        const fighter2NewLife = fighter2.life - impact2;
+
+        // Tableau avec les fighters sélectionnés
+        const newRound = {
+            round: round,
+            fighter1: {
+                ...fighter1,
+                impact: impact1,
+                life: fighter1NewLife,
+            },
+            fighter2: {
+                ...fighter2,
+                impact: impact2,
+                life: fighter2NewLife,
+            }
+        }
+
+        setRounds([...rounds, newRound]);
+        setRound(round + 1);
+
+        // Vérifie si l'un des combattants a perdu tous ses points de vie
+        if (fighter1NewLife <= 0) {
+            console.log(`${fighter1.name} a perdu !`);
+        } else if (fighter2NewLife <= 0) {
+            console.log(`${fighter2.name} a perdu !`);
+        }
+    }
